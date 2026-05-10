@@ -297,11 +297,7 @@ function checkArmsOverheadStrict(lm){
     score:pass?90:45
   };
 }
-  // Wrists out of frame — use elbow elevation as fallback
-  const lEl=lm[LM.L_ELBOW],rEl=lm[LM.R_ELBOW];
-  const lSh=lm[LM.L_SHOULDER],rSh=lm[LM.R_SHOULDER];
-  const elbowsUp=lEl.y<lSh.y-0.05&&rEl.y<rSh.y-0.05;
-  return{pass:elbowsUp,score:elbowsUp?70:20};
+  
 
 function checkChestOpen(lm){
   const needed=[LM.L_SHOULDER,LM.R_SHOULDER,LM.L_HIP,LM.R_HIP];
@@ -545,6 +541,52 @@ function drawSkeleton(lm,color){
   ctx.restore();
 }
 
+function drawAura(lm,color){
+
+  const shoulders=mid(
+    lm[LM.L_SHOULDER],
+    lm[LM.R_SHOULDER]
+  );
+
+  const hips=mid(
+    lm[LM.L_HIP],
+    lm[LM.R_HIP]
+  );
+
+  const top=lC(shoulders);
+  const bottom=lC(hips);
+
+  const gradient=ctx.createRadialGradient(
+    top.x,
+    top.y,
+    40,
+    bottom.x,
+    bottom.y,
+    260
+  );
+
+  gradient.addColorStop(0,color+'88');
+  gradient.addColorStop(1,'transparent');
+
+  ctx.save();
+  ctx.globalAlpha=0.35;
+  ctx.fillStyle=gradient;
+
+  ctx.beginPath();
+
+  ctx.ellipse(
+    (top.x+bottom.x)/2,
+    (top.y+bottom.y)/2,
+    180,
+    300,
+    0,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+  ctx.restore();
+}
 /* ── RESULT HANDLER ── */
 function onResults(results){
   const CW=canvas.width,CH=canvas.height;
@@ -568,7 +610,7 @@ function onResults(results){
   const color=auraColor(sc.total);
 
   drawAura(lm,color);
-drawSkeleton(lm,color);
+  drawSkeleton(lm,color);
   if(!completed)drawHighlight(lm,currentStep);
   updateScorePanel(sc);
 
